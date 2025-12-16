@@ -1,21 +1,45 @@
-# SAR-MARL PettingZoo
+# README – Experiment D: Increased task complexity
 
-Porównanie zespołów heterogenicznych i homogenicznych w kooperacyjnym scenariuszu SAR (Search & Rescue) z PettingZoo + RLlib.
+## Directory Structure
 
-## Szybki start
+.
+├── README.md            # Experiment description
+├── train_rllib.py       # Training script (RLlib)
+├── sar_env.py           # SAR environment definition           
+└── utils.py            # Shared utility functions
+
+---
+
+## Overview / Usage
+
+### Environment Setup
+
 ```bash
-python -m venv .venv && source .venv/bin/activate # Windows: .venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+```
+## Training
+```bash
+Homogeneous Team (Generalist Agents)
+python train_rllib.py --hetero 0 --grid 20 --agents 4 --victims 10 --rubble 0.2 --steps 400 --timesteps 1000
+Heterogeneous Team (Role-Specialized Agents)
+python train_rllib.py --hetero 1 --grid 20 --agents 4 --victims 10 --rubble 0.2 --steps 400 --timesteps 1000
+```
+Training artifacts, including checkpoints, logs, and metrics, are stored in the 
+runs/ directory.
 
-# Trening zespołu homogenicznego (wszyscy identyczni "generalist")
-python train_rllib.py --hetero 0 --grid 15 --agents 4 --victims 6 --rubble 0.18 --steps 400 --timesteps 400000
 
-# Trening zespołu heterogenicznego (scout, support, medic)
-python train_rllib.py --hetero 1 --grid 15 --agents 4 --victims 6 --rubble 0.18 --steps 400 --timesteps 400000
+## Shared Utilities (utils.py)
+The utils.py module provides helper functions shared across all experiments and is not experiment-specific.
 
-# Ewaluacja na checkpointcie
-python evaluate.py --checkpoint runs/ppo_sar_pz_<DATA>/checkpoint_xxxx --episodes 50 --grid 15 --agents 4 --victims 6 --rubble 0.18 --steps 400 --hetero 1 --out results_hetero.csv
-python evaluate.py --checkpoint runs/ppo_sar_pz_<DATA>/checkpoint_xxxx --episodes 50 --grid 15 --agents 4 --victims 6 --rubble 0.18 --steps 400 --hetero 0 --out results_homo.csv
+## Map Representation
+The SAR environment uses integer-encoded cell types defined as constants:
+CELL_EMPTY
+CELL_WALL
+CELL_RUBBLE
+CELL_VICTIM
 
-# Wykresy
-python plot_results.py results_homo.csv results_hetero.csv
+
+## GIF Export
+By default, generated GIF files are stored in the gifs/ directory.

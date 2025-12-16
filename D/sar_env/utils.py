@@ -4,19 +4,16 @@ import random
 import imageio
 import numpy as np
 
-# ---- RNG helpers ----
 def seed_everything(seed: int | None) -> None:
     random.seed(seed)
     np.random.seed(seed if seed is not None else None)
 
-# ---- Grid encoding ----
 CELL_EMPTY  = 0
 CELL_WALL   = 1
 CELL_RUBBLE = 2
 CELL_VICTIM = 3
 CELL_BASE   = 4  # (not used actively but kept for compatibility)
 
-# channels: [empty, wall, rubble, victim, agent, base]; +1 visibility is added in env
 CELL_CHANS = 6
 
 SYMBOLS = {
@@ -36,18 +33,16 @@ MOVE_DELTAS = {
     ACT_RIGHT: ( 0, 1),
 }
 
-def save_episode_gif(env, filename="epizod.gif", max_steps=300, fps=10, folder="gify_epizodow"):
+def save_episode_gif(env, filename="epizod.gif", max_steps=300, fps=10, folder="gifs"):
     import os
     if not os.path.exists(folder):
         os.makedirs(folder)
-    # if filename already has a directory, respect it
     base, ext = os.path.splitext(filename)
     if ext.lower() not in (".gif", ""):
         ext = ".gif"
     if not base:
         base = "epizod"
 
-    # znajdź pierwszy wolny indeks: epizod.gif, epizod_001.gif, epizod_002.gif, ...
     candidate = os.path.join(folder, f"{base}{ext or '.gif'}")
     if os.path.exists(candidate):
         i = 1
@@ -68,25 +63,22 @@ def save_episode_gif(env, filename="epizod.gif", max_steps=300, fps=10, folder="
     step = 0
 
     while not all(done.values()) and step < max_steps:
-        # --- Nowa wersja: zapisuj stan planszy przez render_array ---
         frame = env.render_array()
-        # debug: pokaż wymiar klatki raz
         if not printed:
             printed = True
             try:
                 print(f"[GIF] frame shape: {getattr(frame, 'shape', None)}")
             except Exception:
-                pass  # <-- TO WYWOŁANIE!
+                pass 
         frames.append(frame)
 
-        # Akcje (random/polityka)
         actions = {aid: env.action_space(aid).sample() for aid in env.agents}
         obs, rew, term, trunc, info = env.step(actions)
         done = {aid: term.get(aid, False) or trunc.get(aid, False) for aid in env.agents}
         step += 1
 
     if not frames:
-        print(f"[GIF] Brak klatek do zapisania dla {filepath}")
+        print(f"[GIF] No frames to save for {filepath}")
         return
     imageio.mimsave(filepath, frames, duration=1.0/fps)
 
@@ -95,12 +87,6 @@ def save_episode_gif(env, filename="epizod.gif", max_steps=300, fps=10, folder="
 
 def gen_map(n: int, rubble_density: float, n_victims: int, rng: np.random.Generator
            ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Create a map and return (grid, rubble_levels, victims_mask).
-
-    - grid: int32 (CELL_*), agents are not stored inside
-    - rubble_levels: int32 0..3 (0 means passable)
-    - victims_mask: bool, victim may be under rubble (requires clearing first)
-    """
     assert n >= 5
     grid = np.full((n, n), CELL_EMPTY, dtype=np.int32)
     # walls on border
@@ -147,14 +133,10 @@ def render_ascii(grid: np.ndarray, rubble_levels: np.ndarray, victims_mask: np.n
     return "\n".join("".join(row) for row in canvas)
 
 
-def save_frames_gif(frames, base_filename="train_episode", fps=10, folder="gify_epizodow"):
-    """
-    Zapisuje GIF z listy klatek (np. ndarray RGB) do folderu docelowego.
-    Tworzy katalog, nadaje unikalną nazwę jeśli plik istnieje.
-    """
+def save_frames_gif(frames, base_filename="train_episode", fps=10, folder="gifs"):
     import os, imageio
     if not isinstance(frames, (list, tuple)) or len(frames) == 0:
-        print("[GIF] Brak klatek do zapisania (save_frames_gif).")
+        print("[GIF] No frames to save (save_frames_gif).")
         return
     os.makedirs(folder, exist_ok=True)
     base = base_filename or "train_episode"
@@ -170,4 +152,4 @@ def save_frames_gif(frames, base_filename="train_episode", fps=10, folder="gify_
     try:
         imageio.mimsave(candidate, frames, duration=1.0/max(fps,1))
     except Exception as e:
-        print(f"[GIF] Błąd zapisu GIF (save_frames_gif): {e}")
+        print(f"[GIF] Failed to save GIF (save_frames_gif): {e}")

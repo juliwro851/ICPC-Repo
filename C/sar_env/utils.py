@@ -32,7 +32,7 @@ MOVE_DELTAS = {
     ACT_RIGHT: ( 0, 1),
 }
 
-def save_episode_gif(env, filename="epizod.gif", max_steps=300, fps=10, folder="gify_epizodow"):
+def save_episode_gif(env, filename="epizod.gif", max_steps=300, fps=10, folder="gifs"):
     import os
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -129,7 +129,7 @@ def render_ascii(grid: np.ndarray, rubble_levels: np.ndarray, victims_mask: np.n
     return "\n".join("".join(row) for row in canvas)
 
 
-def save_frames_gif(frames, base_filename="train_episode", fps=10, folder="gify_epizodow"):
+def save_frames_gif(frames, base_filename="train_episode", fps=10, folder="gifs"):
 
     import os, imageio
     if not isinstance(frames, (list, tuple)) or len(frames) == 0:
